@@ -1,5 +1,7 @@
 package com.dpv.entregable02.CustomerMs.services.impl;
 
+import com.dpv.entregable02.CustomerMs.client.Account;
+import com.dpv.entregable02.CustomerMs.client.AccountClient;
 import com.dpv.entregable02.CustomerMs.domain.Customer;
 import com.dpv.entregable02.CustomerMs.dto.CustomerRequest;
 import com.dpv.entregable02.CustomerMs.repositories.CustomerRepository;
@@ -14,11 +16,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class CustomerServiceImpl implements CustomerService {
-
     private final CustomerRepository customerRepository;
+    private final AccountClient accountClient;
+
     @Override
     public Customer registerCustomer(CustomerRequest customerRequest) {
-
         Optional<Customer> dni = customerRepository.findByDni(customerRequest.getDni());
 
         if(dni.isPresent()){
@@ -68,6 +70,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public boolean deleteCustomer(Long id) {
+        List<Account> accountList = accountClient.getAccountByCustomerId(id);
+
+        if(accountList.size() > 0) {
+            throw new RuntimeException("No se puede eliminar, el cliente tiene cuentas asociadas");
+        }
+
         customerRepository.deleteById(id);
         return true;
     }

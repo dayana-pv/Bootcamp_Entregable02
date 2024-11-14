@@ -10,6 +10,7 @@ public interface AccountService {
     public Account saveAccount(AccountRequest accountRequest);
     public List<Account> listAccounts();
     public Account getAccountById(Long id);
+    public List<Account> getAccountsByCustomerId(Long customerId);
     public Account depositBalance(Long id, BalanceRequest balanceRequest);
     public Account removeBalance(Long id, BalanceRequest balanceRequest);
     public boolean deleteAccount(Long id);

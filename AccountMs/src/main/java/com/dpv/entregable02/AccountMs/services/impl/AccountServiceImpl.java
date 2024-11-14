@@ -1,6 +1,7 @@
 package com.dpv.entregable02.AccountMs.services.impl;
 
 import com.dpv.entregable02.AccountMs.domain.Account;
+import com.dpv.entregable02.AccountMs.domain.AccountType;
 import com.dpv.entregable02.AccountMs.dto.AccountRequest;
 import com.dpv.entregable02.AccountMs.dto.BalanceRequest;
 import com.dpv.entregable02.AccountMs.repositories.AccountRepository;
@@ -28,6 +29,8 @@ public class AccountServiceImpl implements AccountService {
                 .customerId(accountRequest.getCustomerId())
                 .build();
 
+        accountRepository.save(account);
+
         return account;
     }
 
@@ -44,6 +47,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public List<Account> getAccountsByCustomerId(Long customerId) {
+        return accountRepository
+                .findByCustomerId(customerId);
+    }
+
+    @Override
     public Account depositBalance(Long id, BalanceRequest balanceRequest) {
         Optional<Account> account = accountRepository.findById(id);
 
@@ -54,12 +63,34 @@ public class AccountServiceImpl implements AccountService {
         Double newBalance = account.get().getBalance() + balanceRequest.getBalance();
         account.get().setBalance(newBalance);
 
+        accountRepository.save(account.get());
+
         return account.get();
     }
 
     @Override
     public Account removeBalance(Long id, BalanceRequest balanceRequest) {
-        return null;
+        Optional<Account> account = accountRepository.findById(id);
+
+        if(account.isEmpty()) {
+            throw new RuntimeException("La cuenta no existe");
+        }
+
+        Double newBalance = account.get().getBalance() - balanceRequest.getBalance();
+
+        if (account.get().getAccountType().equals(AccountType.AHORROS) && newBalance < 0) {
+            throw new RuntimeException("No tiene suficiente saldo para realizar el retiro.");
+        }
+        if (account.get().getAccountType().equals(AccountType.CORRIENTE) && newBalance < -500.00) {
+            throw new RuntimeException("No puede retirar más allá de su límite de sobregiro.");
+        }
+
+        // Si pasa las verificaciones, actualizar el saldo
+        account.get().setBalance(newBalance);
+
+        accountRepository.save(account.get());
+
+        return account.get();
     }
 
     @Override

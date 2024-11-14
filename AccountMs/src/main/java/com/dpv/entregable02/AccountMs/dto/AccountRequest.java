@@ -1,6 +1,7 @@
 package com.dpv.entregable02.AccountMs.dto;
 
 import com.dpv.entregable02.AccountMs.domain.AccountType;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,5 +11,7 @@ import lombok.Setter;
 @Builder
 public class AccountRequest {
     private AccountType accountType;
+
+    @NotNull
     private Long customerId;
 }
